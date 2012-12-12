@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include "read_csv.hpp"
 using namespace std;
 
 // returns true if successfull
@@ -31,19 +32,6 @@ int read_line_by_line(const string& file_name) {
 		++at_line;
 
 		// buffer has the whole line read
-
-		// extract whatever is in it
-		stringstream line(buffer, ios::in);
-
-		int id;
-		string name;
-		string comment;
-
-		line >> id; // ignores errors
-
-		getline(line, name, '\t'); // ignores errors
-
-		getline(line, comment); // ignores errors
 	}
 
 	return at_line;
@@ -53,11 +41,19 @@ int main(int argc, char* argv[]) {
 
 	vector<string> args(argv, argv+argc);
 
-	copy_file(args.at(1), args.at(2));
+	string src(args.at(1)), dest(args.at(2));
 
-	int n = read_line_by_line(args.at(2));
+	copy_file(src, dest);
+
+	int n = read_line_by_line(dest);
 
 	cout << "Read " << n << " lines" << endl;
+
+	read_csv(dest);
+
+	check_id_is_int();
+
+	dump_table("dump_"+dest);
 
 	return 0;
 }
