@@ -46,24 +46,12 @@ void push_to_table(const string& line) {
 
 	string cell;
 
-	for (size_t i=0; i<line.size(); ++i) {
+	istringstream iss(line);
 
-		char c = line.at(i);
+	while (getline(iss, cell, '\t')) {
 
-		if (c=='\t') {
-
-			row.push_back(cell);
-
-			cell = string();
-
-		}
-		else {
-
-			cell.push_back(c);
-		}
+		row.push_back(cell);
 	}
-
-	row.push_back(cell);
 
 	if (row.size() < SIZE) {
 
