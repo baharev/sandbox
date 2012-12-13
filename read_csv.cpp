@@ -87,30 +87,28 @@ int read_csv(const string& file_name) {
 template <typename T>
 T convert(const string& s, bool& failed) {
 
-	failed = true;
-
-	T value = T();
-
 	istringstream iss(s);
 
-	iss.exceptions(ios::failbit | ios::badbit);
+	T value;
 
-	try {
+	iss >> value;
 
-		iss >> value;
-	}
-	catch (...) {
-
-		return value;
-	}
-
-	if (iss.eof()) {
-
-		failed = false;
-	}
+	failed = (iss.fail() || !iss.eof()) ? true : false;
 
 	return value;
 }
+
+
+template <typename T>
+bool equals(const string& s, const T& value) {
+
+	bool failed = true;
+
+	T other = convert<T>(s, failed);
+
+	return !failed && (value==other);
+}
+
 
 
 void check_id_is_int() {
@@ -129,7 +127,7 @@ void check_id_is_int() {
 		}
 		else {
 
-			cout << "Line " << (i+1) << " is OK, id is: \"" << id << "\""<< endl;
+			cout << "Line " << (i+1) << " is OK, id is: \"" << id << "\", equals: " << equals(id, (i+1))<< endl;
 		}
 	}
 }
