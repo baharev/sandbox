@@ -12,31 +12,38 @@ namespace {
 
 vector<vector<string> > table;
 
-//enum column {
-//	DATA_ID,
-//	GC,
-//	COLOR,
-//	LOC,
-//	LOCX,
-//	LOCY,
-//	FORMATION,
-//	DATATYPE,
-//	corrDIPDIR,
-//	corrDIP,
-//	corrLDIR,
-//	corrLDIP,
-//	SENSE,
-//	PALEONORTH,
-//	COMMENT,
-//	SIZE
-//};
-
 enum column {
-	ID,
-	NAME,
-	VALUE,
-	SIZE
+	ID,    // ID    = 0,
+	NAME,  // NAME  = 1,
+	VALUE, // VALUE = 2,
+	SIZE   // SIZE  = 3
 };
+
+int ID_index() {
+
+	return ID;
+}
+
+int NAME_index() {
+
+	return NAME;
+}
+
+int VALUE_index() {
+
+	return VALUE;
+}
+
+struct record {
+
+	record() : id(-1), name("default name"), value(-1) { }
+
+	int    id;
+	string name;
+	int    value;
+};
+
+vector<record> converted_table;
 
 }
 
@@ -168,5 +175,75 @@ void dump_table(const string& file_name) {
 	}
 }
 
+//------------------------------------------------------------------------------
 
+void convert_id(int row_index, record& rec) {
+
+	string id = table.at(row_index).at(ID_index());
+
+	bool failed = true;
+
+	int id_int = str2int(id, failed);
+
+	if (failed) {
+
+		cout << "Line " << (row_index+1) << ": conversion of id \"" << id << "\" failed" << endl;
+	}
+	else {
+
+		rec.id = id_int;
+	}
+}
+
+void check_name(int row_index, record& rec) {
+
+	string name = table.at(row_index).at(NAME_index());
+
+	if (is_allowed_name_ignore_case(name)) {
+
+		rec.name = name;
+	}
+	else {
+
+		cout << "Line " << (row_index+1) << ": name \"" << name << "\" is not allowed" << endl;
+
+	}
+}
+
+void convert_value(int row_index, record& rec) {
+
+	string val = table.at(row_index).at(VALUE_index());
+
+	bool failed = true;
+
+	int value = str2int(val, failed);
+
+	if (failed) {
+
+		cout << "Line " << (row_index+1) << " conversion of value \"" << val << "\" failed" << endl;
+	}
+	else {
+
+		rec.value = value;
+	}
+
+}
+
+void convert_table() {
+
+	converted_table.clear();
+
+	for (size_t i=0; i<table.size(); ++i) {
+
+		record rec;
+
+		convert_id(i, rec);
+
+		check_name(i, rec);
+
+		convert_value(i, rec);
+
+		converted_table.push_back(rec);
+	}
+}
 

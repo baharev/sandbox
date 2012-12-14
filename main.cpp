@@ -63,6 +63,11 @@ int main(int argc, char* argv[]) {
 	check_values();
 
 
+	cout << "----------------------------------------------------------------------" << endl;
+	cout << "Building the table row-by-row as records" << endl;
+
+	convert_table();
+
 
 	dump_table("dump_"+dest);
 

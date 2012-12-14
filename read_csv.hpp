@@ -11,6 +11,8 @@ void check_names();
 
 void check_values();
 
+void convert_table();
+
 void dump_table(const std::string& file_name);
 
 #endif

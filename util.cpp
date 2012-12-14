@@ -76,7 +76,7 @@ bool equals_ignore_case(const string& a, const string& b) {
 }
 
 
-// returns true if successfull
+// returns true if successful
 bool copy_file(const string& source, const string& destination) {
 
 	ifstream in(source.c_str(), ios::binary);
@@ -85,6 +85,6 @@ bool copy_file(const string& source, const string& destination) {
 
 	out << in.rdbuf();
 
-	return in && out;
+	return !in.fail() && !out.fail();
 }
 

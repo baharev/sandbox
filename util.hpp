@@ -13,7 +13,7 @@ bool equals_double(const std::string& s, double x);
 
 bool equals_ignore_case(const std::string& a, const std::string& b);
 
-// returns true if successfull
+// returns true if successful
 bool copy_file(const std::string& source, const std::string& destination);
 
 template <typename T, size_t n>
