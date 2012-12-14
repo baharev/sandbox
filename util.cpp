@@ -1,3 +1,4 @@
+#include <fstream>
 #include <sstream>
 #include <string>
 #include "util.hpp"
@@ -74,4 +75,16 @@ bool equals_ignore_case(const string& a, const string& b) {
     return true;
 }
 
+
+// returns true if successfull
+bool copy_file(const string& source, const string& destination) {
+
+	ifstream in(source.c_str(), ios::binary);
+
+	ofstream out(destination.c_str(), ios::binary);
+
+	out << in.rdbuf();
+
+	return in && out;
+}
 

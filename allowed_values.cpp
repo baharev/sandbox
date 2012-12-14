@@ -7,23 +7,23 @@ using namespace std;
 
 namespace {
 
-string names[] = {
+const string names[] = {
 		"Alice",
 		"Bob",
 		"Christine",
 		"Dave"
 };
 
-int numbers[] = {
+const int numbers[] = {
 		1,
 		2,
 		5,
 		10
 };
 
-vector<string> allowed_names(from_array(names));
+const vector<string> allowed_names(from_array(names));
 
-vector<int> allowed_numbers(from_array(numbers));
+const vector<int> allowed_numbers(from_array(numbers));
 
 }
 

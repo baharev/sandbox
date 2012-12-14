@@ -1,22 +1,8 @@
 #include <fstream>
 #include <iostream>
-#include <string>
-#include <sstream>
-#include <vector>
 #include "read_csv.hpp"
+#include "util.hpp"
 using namespace std;
-
-// returns true if successfull
-bool copy_file(const string& source, const string& destination) {
-
-	ifstream in(source.c_str(), ios::binary);
-
-	ofstream out(destination.c_str(), ios::binary);
-
-	out << in.rdbuf();
-
-	return in && out;
-}
 
 // returns number of lines processed
 int read_line_by_line(const string& file_name) {
