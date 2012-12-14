@@ -1,12 +1,10 @@
-1	name	very long comment	with 	tabs
-b	none
-3	valid	line
-
- 5 		
+1	Dave	8	very long comment	with 	tabs
+b	none	10
+3	aLice
+ 00	Bob	5
+ 5 	christine	2
 		
- 1 2 
- 8
- 	  
 
+ 1 2 	bob	1
+ 9
 
- 

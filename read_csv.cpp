@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include "allowed_values.hpp"
+#include "util.hpp"
 
 using namespace std;
 
@@ -29,11 +31,10 @@ vector<vector<string> > table;
 //	SIZE
 //};
 
-
 enum column {
-	COL1,
-	COL2,
-	COL3,
+	ID,
+	NAME,
+	VALUE,
 	SIZE
 };
 
@@ -84,53 +85,69 @@ int read_csv(const string& file_name) {
 }
 
 
-template <typename T>
-T convert(const string& s, bool& failed) {
-
-	istringstream iss(s);
-
-	T value;
-
-	iss >> value;
-
-	failed = (iss.fail() || !iss.eof()) ? true : false;
-
-	return value;
-}
-
-
-template <typename T>
-bool equals(const string& s, const T& value) {
-
-	bool failed = true;
-
-	T other = convert<T>(s, failed);
-
-	return !failed && (value==other);
-}
-
-
-
-void check_id_is_int() {
+void check_id() {
 
 	for (size_t i=0; i<table.size(); ++i) {
 
 		bool failed = true;
 
-		string id = table.at(i).at(COL1);
+		string id = table.at(i).at(ID);
 
-		int value = convert<int>(id, failed);
+		int value = str2int(id, failed);
 
 		if (failed) {
 
-			cout << "Line " << (i+1) << " contains non-integer COL1: \"" << id << "\""<< endl;
+			cout << "Line " << (i+1) << " contains non-integer ID: \"" << id << "\""<< endl;
 		}
 		else {
 
-			cout << "Line " << (i+1) << " is OK, id is: \"" << id << "\", equals: " << equals(id, (i+1))<< endl;
+			cout << "Line " << (i+1) << " is OK, ID is: \"" << id << "\"";
+			cout << (( equals_int(id, (i+1)) ) ? " and it equals the line number" : "") << endl;
 		}
 	}
 }
+
+
+void check_names() {
+
+	for (size_t i=0; i<table.size(); ++i) {
+
+		string name = table.at(i).at(NAME);
+
+		bool valid = is_allowed_name(name);
+		//bool valid = is_allowed_name_ignore_case(name);
+
+		if (valid) {
+
+			cout << "Line " << (i+1) << " has a valid name: \"" << name << "\""<< endl;
+		}
+		else {
+
+			cout << "Line " << (i+1) << " has an invalid name: \"" << name << "\"" << endl;
+		}
+	}
+}
+
+
+void check_values() {
+
+	for (size_t i=0; i<table.size(); ++i) {
+
+		string value = table.at(i).at(VALUE);
+
+		bool valid = is_allowed_number(value);
+
+		if (valid) {
+
+			cout << "Line " << (i+1) << " has a valid value: \"" << value << "\""<< endl;
+		}
+		else {
+
+			cout << "Line " << (i+1) << " has an invalid value: \"" << value << "\"" << endl;
+		}
+	}
+}
+
 
 void dump_table(const string& file_name) {
 
