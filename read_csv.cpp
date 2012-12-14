@@ -135,7 +135,7 @@ void check_values() {
 
 		string value = table.at(i).at(VALUE);
 
-		bool valid = is_allowed_number(value);
+		bool valid = is_allowed_integer(value);
 
 		if (valid) {
 

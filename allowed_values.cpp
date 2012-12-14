@@ -48,19 +48,19 @@ bool is_allowed_name_ignore_case(const string& s) {
 }
 
 
-bool is_allowed_number(int i) {
+bool is_allowed_integer(int i) {
 
 	return contains(allowed_numbers, i);
 }
 
 
-bool is_allowed_number(const string& s) {
+bool is_allowed_integer(const string& s) {
 
 	bool failed = true;
 
 	int i = str2int(s, failed);
 
-	return !failed && is_allowed_number(i);
+	return !failed && is_allowed_integer(i);
 }
 
 
