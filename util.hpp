@@ -28,4 +28,8 @@ bool contains(const std::vector<T>& vec, const T& elem) {
 	return std::find(vec.begin(), vec.end(), elem) != vec.end();
 }
 
+std::string build_date();
+
+std::string build_time();
+
 #endif

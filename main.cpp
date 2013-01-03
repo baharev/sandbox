@@ -25,6 +25,11 @@ int read_line_by_line(const string& file_name) {
 
 int main(int argc, char* argv[]) {
 
+	cout << "Date: " << build_date() << ", time: " << build_time() << endl;
+
+	return 0;
+
+
 	vector<string> args(argv, argv+argc);
 
 	string src(args.at(1)), dest(args.at(2));

@@ -1,3 +1,4 @@
+#include <ctime>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -88,3 +89,39 @@ bool copy_file(const string& source, const string& destination) {
 	return !in.fail() && !out.fail();
 }
 
+
+string build_date() {
+
+	struct tm date = { 0 };
+
+	strptime(__DATE__, "%b %e %Y", &date);
+
+	char buff[10];
+
+	return strftime(buff, sizeof(buff), "%d/%m/%y", &date) ? buff : "";
+}
+
+string build_date2() {
+
+	struct tm date = { 0 };
+
+	strptime(__DATE__, "%b %e %Y", &date);
+
+	string str_date(asctime(&date));
+
+	return str_date.substr(0, str_date.size()-1);
+}
+
+time_t build_date_to_time_t() {
+
+	struct tm date = { 0 };
+
+	strptime(__DATE__, "%b %e %Y", &date);
+
+	return mktime(&date);
+}
+
+string build_time() {
+
+	return __TIME__;
+}
