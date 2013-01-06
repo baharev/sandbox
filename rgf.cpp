@@ -14,20 +14,20 @@ vector <vector <string> > rgf_to_check;
 
 //--------------------------------------------
 
-
+// TODO Agree on the identifiers, then share the code with the GUI
 const string headers[] = {
 		"DATA_ID",
-		"GC",
-		"COLOR",
-		"LOC",
-		"LOCX",
-		"LOCY",
+		"GROUPCODE",
+		"COLORCODE",
+		"LOCATION",
+		"LOC_X",
+		"LOC_Y",
 		"FORMATION",
 		"DATATYPE",
-		"corrDIPDIR",
-		"corrDIP",
-		"corrLDIR",
-		"corrLDIP",
+		"DIPDIR",
+		"DIP",
+		"LDIR",
+		"LDIP",
 		"SENSE",
 		"PALEONORTH",
 		"COMMENT"
@@ -37,7 +37,7 @@ const vector<string> reserved_headers = from_array(headers);
 
 vector<vector<string> > orig_table;
 
-vector<pair<size_t,size_t> > index_map;
+vector<size_t> index_map;
 
 const size_t NOT_FOUND = numeric_limits<size_t>::max();
 
@@ -46,11 +46,9 @@ const size_t NOT_FOUND = numeric_limits<size_t>::max();
 template <typename Container, typename T>
 size_t find_index(const Container& c, const T& value) {
 
-	typename Container::const_iterator beg = c.begin();
-	typename Container::const_iterator end = c.end();
-	typename Container::const_iterator pos = std::find(beg, end, value);
+	typename Container::const_iterator pos = std::find(c.begin(), c.end(), value);
 
-	return (pos == end) ? NOT_FOUND : std::distance(beg, pos);
+	return (pos == c.end()) ? NOT_FOUND : std::distance(c.begin(), pos);
 }
 
 string to_uppercase(string s) {
@@ -65,11 +63,11 @@ void push_to_table(const string& line) {
 
 	vector<string> row;
 
-	string cell;
-
 	istringstream iss(line);
 
-	while (getline(iss, cell, '\t')) {
+	string cell;
+
+	while (getline(iss, cell, '\t')) { // Why are trailing tabs missing?
 
 		row.push_back(cell);
 	}
@@ -98,33 +96,85 @@ int read_csv(const string& file_name) {
 	return lines_read;
 }
 
-size_t index_in_header(const string& s) {
+vector<size_t> get_duplicates() {
 
-	return find_index(reserved_headers, s);
+	vector<size_t> indices = index_map;
+
+	sort(indices.begin(), indices.end());
+
+	vector<size_t>::iterator first = adjacent_find(indices.begin(), indices.end());
+
+	vector<size_t>::iterator end   = find(first, indices.end(), NOT_FOUND);
+
+	return vector<size_t>(first, end);
 }
 
-void build_column_map() {
+size_t cell_index(size_t i) {
 
-	index_map.clear();
+	return (i < index_map.size()) ? index_map.at(i) : NOT_FOUND;
+}
+
+void dbg_dump_index_map() {
+
+	cout << "Column map: original -> rgf \n";
 
 	const vector<string>& header = orig_table.at(0);
 
 	for (size_t i=0; i<header.size(); ++i) {
 
-		const string& col_name = header.at(i);
+		cout << header.at(i) << " -> ";
 
-		size_t index = index_in_header(col_name);
+		size_t index = cell_index(i);
 
-		if (index!=NOT_FOUND) {
+		if (index==NOT_FOUND) {
 
-			index_map.push_back(make_pair(i,index));
+			cout << "(none)\n";
+		}
+		else {
+
+			cout << reserved_headers.at(index) << '\n';
 		}
 	}
 }
 
-size_t cell_index(size_t i) {
+void check_for_duplicates() {
 
-	return 0; // FIXME Finish!
+	dbg_dump_index_map(); // TODO Comment out if ready
+
+	vector<size_t> dup = get_duplicates();
+
+	if (!dup.empty()) {
+
+		cout << "Error: the following reserved column names were found multiple times:\n";
+	}
+
+	for (size_t i=0; i<dup.size(); ++i) {
+
+		cout << reserved_headers.at(dup.at(i)) << '\n';
+	}
+
+	if (!dup.empty()) {
+
+		cout << "Exiting..." << endl;
+
+		exit(1); // TODO Do the appropriate thing here
+	}
+}
+
+void build_column_map() {
+
+	const vector<string>& header = orig_table.at(0);
+
+	index_map.assign(header.size(), NOT_FOUND);
+
+	for (size_t i=0; i<header.size(); ++i) {
+
+		const string& col_name = header.at(i);
+
+		index_map.at(i) = find_index(reserved_headers, col_name);
+	}
+
+	check_for_duplicates();
 }
 
 void convert_row(const vector<string>& orig_row, size_t index) {
@@ -139,7 +189,8 @@ void convert_row(const vector<string>& orig_row, size_t index) {
 
 		if (index!=NOT_FOUND) {
 
-			row.at(index) = to_uppercase( orig_row.at(i) ); // TODO Also convert to uppercase?
+			//row.at(index) = to_uppercase( orig_row.at(i) ); // TODO Also convert to uppercase?
+			row.at(index) = orig_row.at(i);
 		}
 	}
 
@@ -173,4 +224,28 @@ void read_rgf(const string& file_name) {
 	}
 
 	csv_to_rgf();
+}
+
+void dump_table(const string& file_name, const vector<vector<string> >& table) {
+
+	ofstream out(file_name.c_str());
+
+	for (size_t i=0; i<table.size(); ++i) {
+
+		const vector<string>& row = table.at(i);
+
+		for (size_t j=0; j<row.size(); ++j) {
+
+			const string& cell = row.at(j);
+
+			out << cell << ((j < row.size()-1)? '\t' : '\n');
+		}
+	}
+}
+
+void dbg_dump_tables() {
+
+	dump_table("orig.txt", orig_table);
+
+	dump_table("conv.txt", rgf_to_check);
 }
