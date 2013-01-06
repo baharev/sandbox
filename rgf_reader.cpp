@@ -3,7 +3,7 @@
 #include <limits>
 #include <sstream>
 #include <vector>
-#include "rgf.hpp"
+#include "rgf_reader.hpp"
 #include "util.hpp"
 
 using namespace std;
