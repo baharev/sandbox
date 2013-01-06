@@ -1,7 +1,6 @@
 #include <string>
 #include <vector>
 #include "ReservedColumnNames.hpp"
-#include "util.hpp"
 
 using namespace std;
 
@@ -26,6 +25,12 @@ const string headers[] = {
 		"PALEONORTH",
 		"COMMENT"
 };
+
+template <typename T, size_t n>
+vector<T> from_array(const T (&array)[n]) {
+
+	return vector<T>(array, array+n);
+}
 
 const vector<string> reserved_headers = from_array(headers);
 
