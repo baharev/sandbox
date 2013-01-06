@@ -58,7 +58,6 @@ string to_uppercase(string s) {
 	return s;
 }
 
-
 void push_to_table(const string& line) {
 
 	vector<string> row;
@@ -67,19 +66,10 @@ void push_to_table(const string& line) {
 
 	string cell;
 
-    size_t first(0), pos(0);
+	while (getline(iss, cell, '\t')) {
 
-    while ((pos = line.find('\t', first)) != std::string::npos) {
-
-        row.push_back(line.substr(first, pos-first));
-
-        first = pos+1;
-    }
-
-    if (first < line.length()) { // adds the empty cell due to trailing tab
-
-        row.push_back(line.substr(first, std::string::npos));
-    }
+		row.push_back(cell);
+	}
 
 	orig_table.push_back(row);
 }
@@ -98,24 +88,11 @@ int read_csv(const string& file_name) {
 
 		++lines_read;
 
-		push_to_table(line);
+		push_to_table(line+'\t'); // so that we don't loose trailing tabs
 
 	}
 
 	return lines_read;
-}
-
-vector<size_t> get_duplicates() {
-
-	vector<size_t> indices = index_map;
-
-	sort(indices.begin(), indices.end());
-
-	vector<size_t>::iterator first = adjacent_find(indices.begin(), indices.end());
-
-	vector<size_t>::iterator end   = find(first, indices.end(), NOT_FOUND);
-
-	return vector<size_t>(first, end);
 }
 
 size_t cell_index(size_t i) {
@@ -146,31 +123,28 @@ void dbg_dump_index_map() {
 	}
 }
 
-void check_for_duplicates() {
+void check_duplicates(const vector<size_t>& dup) {
 
-	dbg_dump_index_map(); // TODO Comment out if ready
+	if (dup.empty()) {
 
-	vector<size_t> dup = get_duplicates();
-
-	if (!dup.empty()) {
-
-		cout << "Error: the following reserved column names were found multiple times:\n";
+		return;
 	}
+
+	cout << "Error: the following reserved column names were found multiple times:\n";
 
 	for (size_t i=0; i<dup.size(); ++i) {
 
 		cout << reserved_headers.at(dup.at(i)) << '\n';
 	}
 
-	if (!dup.empty()) {
+	cout << "Exiting..." << endl;
 
-		cout << "Exiting..." << endl;
-
-		exit(1); // TODO Do the appropriate thing here
-	}
+	exit(1); // TODO Do the appropriate thing here
 }
 
 void build_column_map() {
+
+	vector<size_t> duplicates;
 
 	const vector<string>& header = orig_table.at(0);
 
@@ -180,10 +154,25 @@ void build_column_map() {
 
 		const string& col_name = header.at(i);
 
-		index_map.at(i) = find_index(reserved_headers, col_name);
+		size_t index = find_index(reserved_headers, col_name); // TODO to_uppercase(col_name) if case insensitive
+
+		if (index==NOT_FOUND) {
+
+			// That's OK
+		}
+		else if (contains(index_map, index)) {
+
+			duplicates.push_back(index);
+		}
+		else {
+
+			index_map.at(i) = index;
+		}
 	}
 
-	check_for_duplicates();
+	check_duplicates(duplicates);
+
+	dbg_dump_index_map(); // TODO Comment out if ready
 }
 
 void convert_row(const vector<string>& orig_row, size_t index) {
@@ -198,7 +187,7 @@ void convert_row(const vector<string>& orig_row, size_t index) {
 
 		if (index!=NOT_FOUND) {
 
-			//row.at(index) = to_uppercase( orig_row.at(i) ); // TODO Also convert to uppercase?
+			//row.at(index) = to_uppercase( orig_row.at(i) ); // TODO Convert to uppercase?
 			row.at(index) = orig_row.at(i);
 		}
 	}
@@ -228,11 +217,13 @@ void read_rgf(const string& file_name) {
 	int lines_read = read_csv(file_name);
 
 	if (lines_read<1) {
-		cerr << "No header read, exiting..." << endl;
+		cerr << "Nothing has been read from file " << file_name << ", exiting..." << endl; // we don't know why (empty or open() failed)
 		exit(1); // TODO Do the appropriate thing here
 	}
 
 	csv_to_rgf();
+
+	// TODO There may not be any data at this point, check!
 }
 
 void dump_table(const string& file_name, const vector<vector<string> >& table) {
