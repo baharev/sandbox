@@ -1,6 +1,6 @@
 #include <string>
 #include <vector>
-#include "reserved_column_names.hpp"
+#include "ReservedColumnNames.hpp"
 #include "util.hpp"
 
 using namespace std;

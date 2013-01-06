@@ -4,7 +4,7 @@
 #include <sstream>
 #include <vector>
 #include "rgf_reader.hpp"
-#include "reserved_column_names.hpp"
+#include "ReservedColumnNames.hpp"
 #include "util.hpp"
 
 using namespace std;
