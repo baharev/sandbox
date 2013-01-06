@@ -2,14 +2,16 @@
 #include <sstream>
 using namespace std;
 
-void dump(const string& token) {
+int counter = 0;
 
-	static int counter = 0;
+void dump(const string& token) {
 
 	cout << ++counter << "\t{" << token << "}\n";
 }
 
 void parse_line(const string& line) {
+
+	counter = 0;
 
 	istringstream iss(line);
 
@@ -31,9 +33,14 @@ void parse_line(const string& line) {
 
 int main() {
 
-	string line("a\tb\t\t\t");
+	string a("\t");
+	string b("\n");
 
-	parse_line(line);
+	parse_line(a);
+
+	cout << "-------------------------" << endl;
+
+	parse_line(b);
 
 	return 0;
 }
