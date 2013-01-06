@@ -9,7 +9,7 @@ void dump(const string& token) {
 	cout << ++counter << "\t{" << token << "}\n";
 }
 
-void parse_line(const string& line) {
+void parse(const string& line) {
 
 	counter = 0;
 
@@ -19,6 +19,8 @@ void parse_line(const string& line) {
 
     while ((pos = line.find('\t', first)) != std::string::npos) {
 
+    	//cout << "while\n";
+
    		dump(line.substr(first, pos-first));
 
         first = pos+1;
@@ -26,21 +28,37 @@ void parse_line(const string& line) {
 
     if (first < line.length()) { // adds the empty cell due to trailing tab
 
+    	//cout << "if\n";
+
     	dump(line.substr(first, std::string::npos));
     }
 }
 
+void parse2(const string& line) {
+
+	counter = 0;
+
+	istringstream iss(line);
+
+	string token;
+
+    while (getline(iss, token, '\t')) {
+
+   		dump(token);
+    }
+}
 
 int main() {
 
-	string a("\t");
-	string b("\n");
+	string a("a\t\t");
 
-	parse_line(a);
+	parse2(a);
 
 	cout << "-------------------------" << endl;
 
-	parse_line(b);
+	string b("a\t");
+
+	parse2(b);
 
 	return 0;
 }
