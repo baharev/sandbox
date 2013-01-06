@@ -67,10 +67,19 @@ void push_to_table(const string& line) {
 
 	string cell;
 
-	while (getline(iss, cell, '\t')) { // Why are trailing tabs missing?
+    size_t first(0), pos(0);
 
-		row.push_back(cell);
-	}
+    while ((pos = line.find('\t', first)) != std::string::npos) {
+
+        row.push_back(line.substr(first, pos-first));
+
+        first = pos+1;
+    }
+
+    if (first < line.length()) { // adds the empty cell due to trailing tab
+
+        row.push_back(line.substr(first, std::string::npos));
+    }
 
 	orig_table.push_back(row);
 }
