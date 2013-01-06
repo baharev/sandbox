@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include "rgf_reader.hpp"
+#include "reserved_column_names.hpp"
 #include "util.hpp"
 
 using namespace std;
@@ -11,29 +12,6 @@ using namespace std;
 namespace {
 
 vector <vector <string> > rgf_to_check;
-
-//--------------------------------------------
-
-// TODO Agree on the identifiers, then share the code with the GUI
-const string headers[] = {
-		"DATA_ID",
-		"GROUPCODE",
-		"COLORCODE",
-		"LOCATION",
-		"LOC_X",
-		"LOC_Y",
-		"FORMATION",
-		"DATATYPE",
-		"DIPDIR",
-		"DIP",
-		"LDIR",
-		"LDIP",
-		"SENSE",
-		"PALEONORTH",
-		"COMMENT"
-};
-
-const vector<string> reserved_headers = from_array(headers);
 
 vector<vector<string> > orig_table;
 
@@ -118,7 +96,7 @@ void dbg_dump_index_map() {
 		}
 		else {
 
-			cout << reserved_headers.at(index) << '\n';
+			cout << reserved_column_names().at(index) << '\n';
 		}
 	}
 }
@@ -134,7 +112,7 @@ void check_duplicates(const vector<size_t>& dup) {
 
 	for (size_t i=0; i<dup.size(); ++i) {
 
-		cout << reserved_headers.at(dup.at(i)) << '\n';
+		cout << reserved_column_names().at(dup.at(i)) << '\n';
 	}
 
 	cout << "Exiting..." << endl;
@@ -154,7 +132,7 @@ void build_column_map() {
 
 		const string& col_name = header.at(i);
 
-		size_t index = find_index(reserved_headers, col_name); // TODO to_uppercase(col_name) if case insensitive
+		size_t index = find_index(reserved_column_names(), col_name); // TODO to_uppercase(col_name) if case insensitive
 
 		if (index==NOT_FOUND) {
 
@@ -177,7 +155,7 @@ void build_column_map() {
 
 void convert_row(const vector<string>& orig_row, size_t index) {
 
-	const size_t n_col = reserved_headers.size();
+	const size_t n_col = reserved_column_names().size();
 
 	vector<string> row(n_col);
 
