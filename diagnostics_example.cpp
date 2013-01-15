@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iomanip>
+#include <limits>
 #include <string>
 #include "diagnostics.hpp"
 
@@ -16,7 +17,7 @@ void solve_quadratic_equation(double a, double b, double c) {
 	double eps = 1.0e-4;
 
 	// Comment out the line below to make a "bug" on purpose
-	residual = 0.05;
+	//residual = 0.05;
 
 	ASSERT2((residual>-eps)&&(residual<eps), "residual = " << scientific << residual << ", x1 = " << x1);
 }
@@ -33,4 +34,7 @@ void diagnostics_example() {
 
 	expects_input_length_two("some dummy string"); // assume some user-entered string
 
+	double not_a_number = std::numeric_limits<double>::quiet_NaN();
+
+	solve_quadratic_equation(1, not_a_number, 2);
 }
