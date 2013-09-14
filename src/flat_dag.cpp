@@ -5,5 +5,8 @@
 //
 
 
+#include "flat_dag.hpp"
 
+flat_dag::flat_dag() {
 
+}

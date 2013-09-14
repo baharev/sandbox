@@ -6,20 +6,14 @@
 #ifndef FLAT_DAG_HPP_
 #define FLAT_DAG_HPP_
 
-namespace hdc {
-
 class flat_dag {
 
 public:
 
-    flat_dag() {
-
-    }
+    flat_dag();
 
 private:
 
 };
-
-}
 
 #endif
