@@ -3,8 +3,12 @@
 //
 //  Please refer to the LICENSE file in the top directory
 //
-#include "flat_dag.hpp"
+#include "build_test.hpp"
 
-flat_dag::flat_dag() {
+void build_test::init(const std::vector<std::string>& ) {
+
+}
+
+void build_test::run() {
 
 }
