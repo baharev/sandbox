@@ -18,6 +18,12 @@ public:
 
 private:
 
+    void dummy_example();
+
+    void bratu();
+
+    void show();
+
 };
 
 #endif
