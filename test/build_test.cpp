@@ -39,8 +39,8 @@ struct str_node {
         nodes.push_back(*this);
     }
 
-    str_node(string&& name)
-    : name(move(name)),
+    str_node(string&& given_name)
+    : name(move(given_name)),
       index(counter++)
     {
         nodes.push_back(*this);
