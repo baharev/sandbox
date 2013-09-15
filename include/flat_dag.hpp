@@ -10,6 +10,8 @@ class flat_dag {
 
 public:
 
+    typedef int offset_type;
+
     flat_dag();
 
 private:
