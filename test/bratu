@@ -1,0 +1,26 @@
+
+param n := 3;
+
+param c := (1.0/(n+1.0))^2;
+
+var x{0..n+1} >= 0, <=5, := 3; # intial guesses: 3 and 2.5
+
+def_x0:
+  x[0] = 0;
+  
+def_last:
+  x[n+1] = 0;
+  
+eq{i in 1..n}:
+  x[i+1] - 2*x[i] + x[i-1] + c*exp(x[i]) = 0.0;
+  
+option solver "/home/ali/ampl/ipopt";
+
+expand _scon;
+
+option show_stats 1;
+
+solve;
+
+display x;
+
