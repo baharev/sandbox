@@ -5,6 +5,7 @@
 //
 #include <iostream>
 #include <iterator>
+#include <stdexcept>
 #include "test_runner.hpp"
 #include "all_classes_include.hpp"
 #include "test.hpp"
@@ -85,7 +86,7 @@ void test_runner::run_test(const string& name) const {
 
         cout << "Error: test \"" << name << "\" not found!" << endl;
 
-        return;
+        throw std::runtime_error(__PRETTY_FUNCTION__);
     }
 
     vector<string> test_args{ args.size()==2 ? args.at(1) : string() };
