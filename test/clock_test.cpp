@@ -5,6 +5,7 @@
 //
 #include <chrono>
 #include <iostream>
+#include <boost/chrono.hpp>
 #include "clock_test.hpp"
 
 namespace detail {
@@ -23,7 +24,7 @@ void clock_test::init(const std::vector<std::string>& ) {
 
 }
 
-void clock_test::run() {
+void clock_test::std_clock() {
 
     using namespace std;
     using namespace std::chrono;
@@ -41,7 +42,40 @@ void clock_test::run() {
     auto finish = high_resolution_clock::now();
 
     cout << duration_cast<microseconds>(finish-start).count() << " us" << endl;
+}
 
+void clock_test::boost_clock() {
+
+    using namespace boost;
+    using namespace boost::chrono;
+    using std::cerr;
+    using std::endl;
+    using std::flush;
+
+    cerr << "Claimed precision of the high_resolution_clock is ";
+
+    typedef boost::chrono::duration<double, boost::nano> NS;
+
+    NS ns = boost::chrono::high_resolution_clock::duration(1);
+
+    std::cout << ns.count() << " ns" << std::endl;
+
+    auto start = high_resolution_clock::now();
+
+    for (int i=0; i<1; ++i)
+        cerr << ' ' << flush;
+    cerr << endl;
+
+    auto finish = high_resolution_clock::now();
+
+    cerr << duration_cast<microseconds>(finish-start).count() << " us" << endl;
+}
+
+void clock_test::run() {
+
+    std_clock();
+
+    boost_clock();
 }
 
 

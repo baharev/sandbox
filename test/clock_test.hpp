@@ -19,6 +19,10 @@ public:
 
 private:
 
+    void std_clock();
+
+    void boost_clock();
+
 };
 
 #endif
