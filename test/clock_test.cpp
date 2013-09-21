@@ -8,17 +8,12 @@
 #include <boost/chrono.hpp>
 #include "clock_test.hpp"
 
-namespace detail {
+using std::cerr;
+using std::endl;
+using std::flush;
 
-template <class Clock>
-void display_precision()
-{
-    typedef std::chrono::duration<double, std::nano> NS;
-    NS ns = typename Clock::duration(1);
-    std::cout << ns.count() << " ns" << std::endl;
-}
-
-} // namespace detail
+volatile size_t n_times = 1000;
+volatile size_t dummy;
 
 void clock_test::init(const std::vector<std::string>& ) {
 
@@ -26,12 +21,13 @@ void clock_test::init(const std::vector<std::string>& ) {
 
 void clock_test::std_clock() {
 
-    using namespace std;
     using namespace std::chrono;
 
-    cout << "Claimed precision of the high_resolution_clock is ";
+    typedef duration<double, std::nano> NS;
 
-    detail::display_precision<high_resolution_clock>();
+    NS ns = high_resolution_clock::duration(1);
+
+    cerr << "Claimed precision of the high_resolution_clock is " << ns.count() << " ns" << endl;
 
     auto start = high_resolution_clock::now();
 
@@ -41,30 +37,23 @@ void clock_test::std_clock() {
 
     auto finish = high_resolution_clock::now();
 
-    cout << duration_cast<microseconds>(finish-start).count() << " us" << endl;
+    cerr << duration_cast<microseconds>(finish-start).count() << " us" << endl;
 }
 
 void clock_test::boost_clock() {
 
-    using namespace boost;
     using namespace boost::chrono;
-    using std::cerr;
-    using std::endl;
-    using std::flush;
 
-    cerr << "Claimed precision of the high_resolution_clock is ";
+    typedef duration<double, boost::nano> NS;
 
-    typedef boost::chrono::duration<double, boost::nano> NS;
+    NS ns = high_resolution_clock::duration(1);
 
-    NS ns = boost::chrono::high_resolution_clock::duration(1);
-
-    std::cout << ns.count() << " ns" << std::endl;
+    cerr << "Claimed precision of the high_resolution_clock is " << ns.count() << " ns" << endl;
 
     auto start = high_resolution_clock::now();
 
-    for (int i=0; i<1; ++i)
-        cerr << ' ' << flush;
-    cerr << endl;
+    for (size_t i=0; i<n_times; ++i)
+        dummy += i;
 
     auto finish = high_resolution_clock::now();
 
