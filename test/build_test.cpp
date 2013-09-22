@@ -17,7 +17,7 @@
 
 using namespace std;
 
-#define BUILD_STR_NODES
+//#define BUILD_STR_NODES
 
 struct str_node;
 
@@ -182,7 +182,7 @@ offset sumlist(offset args) {
     offset n   = offsets.at(args);
 
     offset res = offsets.at(args+n+1);
-
+#ifdef BUILD_STR_NODES
     cout << nodes.at(res).name << " = " << flush;
 
     for (offset i=1; i<n; i+=2) {
@@ -197,7 +197,7 @@ offset sumlist(offset args) {
     }
 
     cout << endl;
-
+#endif
     return args+n+2;
 }
 
@@ -242,7 +242,31 @@ offset exp(offset args) {
     return args+2;
 }
 
+offset sumlist(offset args) {
+
+    offset n   = offsets.at(args);
+
+    offset res = offsets.at(args+n+1);
+
+    T sum(0.0);
+
+    for (offset i=1; i<n; i+=2) {
+
+        offset c = offsets.at(args+i  );
+
+        offset x = offsets.at(args+i+1);
+
+        sum += T_nodes.at(c)*T_nodes.at(x);
+    }
+
+    T_nodes.at(res) = sum;
+
+    return args+n+2;
+}
+
 } // namespace safe
+
+//namespace unsafe {
 
 offset add(offset args) {
 
@@ -276,10 +300,34 @@ offset exp(offset args) {
 
     offset res = offsets[args+1];
 
-    T_nodes[res] = exp(T_nodes[arg]);
+    T_nodes[res] = std::exp(T_nodes[arg]);
 
     return args+2;
 }
+
+offset sumlist(offset args) {
+
+    offset n   = offsets[args];
+
+    offset res = offsets[args+n+1];
+
+    T sum(0.0);
+
+    for (offset i=1; i<n; i+=2) {
+
+        offset c = offsets[args+i  ];
+
+        offset x = offsets[args+i+1];
+
+        sum += T_nodes[c]*T_nodes[x];
+    }
+
+    T_nodes[res] = sum;
+
+    return args+n+2;
+}
+
+//} // namespace unsafe
 
 str_node operator+(const str_node& lhs, const str_node& rhs) {
 
@@ -304,8 +352,10 @@ str_node exp(const str_node& arg) {
 str_node sumlist(initializer_list<str_node> s) {
 
     offset n = static_cast<offset>(s.size());
-
+#ifdef BUILD_STR_NODES
     functions.push_back(detail::sumlist);
+#endif
+    T_functions.push_back(sumlist);
 
     offsets.push_back(n);
 
@@ -446,7 +496,7 @@ void build_test::dummy_example() {
 
 void build_test::bratu_with_sumlist() {
 
-    const int n = 3;
+    const int n = 20000000;
 
     const double h2 = std::pow(1.0/(n+1), 2);
 
