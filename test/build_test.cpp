@@ -58,10 +58,10 @@ struct str_node {
     }
 
     str_node(string&& given_name)
-    : name(move(given_name)),
-      index(counter++)
+    :  index(counter++)
     {
 #ifdef BUILD_STR_NODES
+        name(move(given_name));
         nodes.push_back(*this);
 #endif
         T_nodes.push_back(T{});
@@ -70,9 +70,10 @@ struct str_node {
     }
 
     explicit str_node(double d)
-    : name("n"+to_string(counter)), index(counter++)
+    :   index(counter++)
     {
 #ifdef BUILD_STR_NODES
+        name("n"+to_string(counter));
         nodes.push_back(*this);
 #endif
         T_nodes.push_back(T(d));
@@ -86,7 +87,9 @@ struct str_node {
 
     str_node& operator=(str_node&& other) noexcept {
         index = other.index;
+#ifdef BUILD_STR_NODES
         name.swap(other.name);
+#endif
         return *this;
     }
 
@@ -94,9 +97,9 @@ struct str_node {
 
         con_pos.push_back(index);
     }
-
+#ifdef BUILD_STR_NODES
     string name;
-
+#endif
     offset index;
 };
 
@@ -496,7 +499,7 @@ void build_test::dummy_example() {
 
 void build_test::bratu_with_sumlist() {
 
-    const int n = 20000000;
+    const int n = 3;
 
     const double h2 = std::pow(1.0/(n+1), 2);
 
