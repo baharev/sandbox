@@ -24,6 +24,8 @@ private:
 
     void show();
 
+    void forward_sweep();
+
 };
 
 #endif

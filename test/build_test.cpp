@@ -3,12 +3,16 @@
 //
 //  Please refer to the LICENSE file in the top directory
 //
+#include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <boost/chrono.hpp>
 #include "build_test.hpp"
 
 using namespace std;
@@ -17,41 +21,61 @@ struct str_node;
 
 namespace {
 
-typedef int(*operation)(int );
+typedef double T;
+typedef uint32_t offset;
+typedef offset(*operation)(offset );
 
-int counter = 0;
-vector<int> offsets;
+offset counter = 0;
+vector<offset> offsets;
+
+#ifdef BUILD_STR_NODES
 vector<operation> functions;
 vector<str_node> nodes;
+#endif
 
-vector<int> var_pos;
-vector<int> con_pos;
-vector<pair<int,double>> num_pos;
+vector<operation> T_functions;
+vector<T>         T_nodes;
+
+vector<offset> var_pos;
+vector<offset> con_pos;
+vector<pair<offset,double>> num_pos;
 
 }
 
 struct str_node {
 
     str_node() : index(counter++) {
+#ifdef BUILD_STR_NODES
         stringstream ss;
         ss << "v" << index;
         name = ss.str();
         nodes.push_back(*this);
+#endif
+        T_nodes.push_back(T{});
+        assert(counter!=numeric_limits<offset>::max());
     }
 
     str_node(string&& given_name)
     : name(move(given_name)),
       index(counter++)
     {
+#ifdef BUILD_STR_NODES
         nodes.push_back(*this);
+#endif
+        T_nodes.push_back(T{});
         var_pos.push_back(index);
+        assert(counter!=numeric_limits<offset>::max());
     }
 
     explicit str_node(double d)
     : name("n"+to_string(counter)), index(counter++)
     {
+#ifdef BUILD_STR_NODES
         nodes.push_back(*this);
+#endif
+        T_nodes.push_back(T(d));
         num_pos.push_back({index, d});
+        assert(counter!=numeric_limits<offset>::max());
     }
 
     str_node(const str_node& ) = default;
@@ -71,12 +95,14 @@ struct str_node {
 
     string name;
 
-    int index;
+    offset index;
 };
 
-str_node add_binary_node(operation op, const str_node& lhs, const str_node& rhs) {
-
+str_node add_binary_node(operation op, operation T_op, const str_node& lhs, const str_node& rhs) {
+#ifdef BUILD_STR_NODES
     functions.push_back(op);
+#endif
+    T_functions.push_back(T_op);
 
     str_node res;
 
@@ -89,9 +115,11 @@ str_node add_binary_node(operation op, const str_node& lhs, const str_node& rhs)
     return res;
 }
 
-str_node add_unary_node(operation op, const str_node& arg) {
-
+str_node add_unary_node(operation op, operation T_op, const str_node& arg) {
+#ifdef BUILD_STR_NODES
     functions.push_back(op);
+#endif
+    T_functions.push_back(T_op);
 
     str_node res;
 
@@ -102,57 +130,139 @@ str_node add_unary_node(operation op, const str_node& arg) {
     return res;
 }
 
-int add(int args) {
+namespace detail {
 
-    int lhs = offsets.at(args  );
+offset add(offset args) {
 
-    int rhs = offsets.at(args+1);
+    offset lhs = offsets.at(args  );
 
-    int res = offsets.at(args+2);
+    offset rhs = offsets.at(args+1);
 
+    offset res = offsets.at(args+2);
+#ifdef BUILD_STR_NODES
     cout << nodes.at(res).name << " = ";
 
     cout << nodes.at(lhs).name << " + " << nodes.at(rhs).name << endl;
-
+#endif
     return args+3;
 }
 
-int mul(int args) {
+offset mul(offset args) {
 
-    int lhs = offsets.at(args  );
+    offset lhs = offsets.at(args  );
 
-    int rhs = offsets.at(args+1);
+    offset rhs = offsets.at(args+1);
 
-    int res = offsets.at(args+2);
-
+    offset res = offsets.at(args+2);
+#ifdef BUILD_STR_NODES
     cout << nodes.at(res).name << " = ";
 
     cout << nodes.at(lhs).name << " * " << nodes.at(rhs).name << endl;
+#endif
+    return args+3;
+}
+
+offset exp(offset args) {
+
+    offset arg = offsets.at(args  );
+
+    offset res = offsets.at(args+1);
+#ifdef BUILD_STR_NODES
+    cout << nodes.at(res).name << " = ";
+
+    cout << "exp(" << nodes.at(arg).name << ")" << endl;
+#endif
+    return args+2;
+}
+
+} // namespace detail
+
+namespace safe {
+
+offset add(offset args) {
+
+    offset lhs = offsets.at(args  );
+
+    offset rhs = offsets.at(args+1);
+
+    offset res = offsets.at(args+2);
+
+    T_nodes.at(res) = T_nodes.at(lhs) + T_nodes.at(rhs);
 
     return args+3;
 }
 
-int exp(int args) {
+offset mul(offset args) {
 
-    int arg = offsets.at(args  );
+    offset lhs = offsets.at(args  );
 
-    int res = offsets.at(args+1);
+    offset rhs = offsets.at(args+1);
 
-    cout << nodes.at(res).name << " = ";
+    offset res = offsets.at(args+2);
 
-    cout << "exp(" << nodes.at(arg).name << ")" << endl;
+    T_nodes.at(res) = T_nodes.at(lhs) * T_nodes.at(rhs);
+
+    return args+3;
+}
+
+offset exp(offset args) {
+
+    offset arg = offsets.at(args  );
+
+    offset res = offsets.at(args+1);
+
+    T_nodes.at(res) = std::exp(T_nodes.at(arg));
+
+    return args+2;
+}
+
+} // namespace safe
+
+offset add(offset args) {
+
+    offset lhs = offsets[args  ];
+
+    offset rhs = offsets[args+1];
+
+    offset res = offsets[args+2];
+
+    T_nodes[res] = T_nodes[lhs] + T_nodes[rhs];
+
+    return args+3;
+}
+
+offset mul(offset args) {
+
+    offset lhs = offsets[args  ];
+
+    offset rhs = offsets[args+1];
+
+    offset res = offsets[args+2];
+
+    T_nodes[res] = T_nodes[lhs] * T_nodes[rhs];
+
+    return args+3;
+}
+
+offset exp(offset args) {
+
+    offset arg = offsets[args  ];
+
+    offset res = offsets[args+1];
+
+    T_nodes[res] = exp(T_nodes[arg]);
 
     return args+2;
 }
 
 str_node operator+(const str_node& lhs, const str_node& rhs) {
 
-    return add_binary_node(add, lhs, rhs);
+    return add_binary_node(detail::add, add, lhs, rhs);
 }
 
 str_node operator*(const str_node& lhs, const str_node& rhs) {
 
-    return add_binary_node(mul, lhs, rhs);
+    return add_binary_node(detail::mul, mul, lhs, rhs);
 }
 
 str_node operator*(double d, const str_node& rhs) {
@@ -162,7 +272,7 @@ str_node operator*(double d, const str_node& rhs) {
 
 str_node exp(const str_node& arg) {
 
-    return add_unary_node(exp, arg);
+    return add_unary_node(detail::exp, exp, arg);
 }
 
 void build_test::init(const std::vector<std::string>& ) {
@@ -170,12 +280,10 @@ void build_test::init(const std::vector<std::string>& ) {
 }
 
 void build_test::show() {
-
-    int args = 0;
-
+#ifdef BUILD_STR_NODES
     cout << "variables" << endl;
 
-    for (int var : var_pos) {
+    for (auto var : var_pos) {
 
         const str_node& node = nodes.at(var);
 
@@ -184,7 +292,7 @@ void build_test::show() {
 
     cout << "constraints" << endl;
 
-    for (int con : con_pos) {
+    for (auto con : con_pos) {
 
         const str_node& node = nodes.at(con);
 
@@ -202,17 +310,64 @@ void build_test::show() {
 
     cout << "evaluation" << endl;
 
-    for (const auto& f : functions) {
+    offset args = 0;
+
+    for (auto f : functions) {
 
         args = f(args);
     }
+#endif
+}
+
+void build_test::forward_sweep() {
+
+    for (auto var : var_pos) {
+
+        T_nodes.at(var) = 1.1;
+    }
+
+//    cout << "variables" << endl;
+//
+//    for (auto var : var_pos) {
+//
+//        cout << T_nodes.at(var) << '\n';
+//    }
+
+    using namespace boost::chrono;
+
+    auto start = high_resolution_clock::now();
+
+    offset args = 0;
+
+    for (auto f : T_functions) {
+
+        args = f(args);
+    }
+
+    auto finish = high_resolution_clock::now();
+
+    cout << duration_cast<milliseconds>(finish-start).count() << " ms" << endl;
+    cout << duration_cast<microseconds>(finish-start).count() << " us" << endl;
+
+//    cout << "residuals" << endl;
+//
+//    for (auto con : con_pos) {
+//
+//        cout << T_nodes.at(con) << '\n';
+//    }
 }
 
 void build_test::run() {
 
     bratu();
 
-    show();
+    //show();
+#ifdef BUILD_STR_NODES
+    nodes = vector<str_node>();
+
+    functions = vector<operation>();
+#endif
+    forward_sweep();
 }
 
 void build_test::dummy_example() {
@@ -237,7 +392,7 @@ void build_test::dummy_example() {
 
 void build_test::bratu() {
 
-    const int n = 3;
+    const int n = 20000;
 
     const double h2 = std::pow(1.0/(n+1), 2);
 
