@@ -301,42 +301,6 @@ str_node exp(const str_node& arg) {
     return add_unary_node(detail::exp, exp, arg);
 }
 
-str_node sumlist_cx(const str_node& c, const str_node& x) {
-
-    str_node res;
-
-    offsets.push_back(c.index);
-
-    offsets.push_back(x.index);
-
-    offsets.push_back(res.index);
-
-    return res;
-}
-
-template <typename... Args>
-str_node sumlist_cx(const str_node& c, const str_node& x, Args&&... s) {
-
-    offsets.push_back(c.index);
-
-    offsets.push_back(x.index);
-
-    return sumlist(forward<Args>(s)...);
-}
-
-
-template <typename... Args>
-str_node sumlist(Args&&... s) {
-
-    offset n = sizeof... (Args);
-
-    functions.push_back(detail::sumlist);
-
-    offsets.push_back(n);
-
-    return sumlist_cx(forward<Args>(s)...);
-}
-
 str_node sumlist(initializer_list<str_node> s) {
 
     offset n = static_cast<offset>(s.size());
