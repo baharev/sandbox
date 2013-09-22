@@ -22,6 +22,8 @@ private:
 
     void bratu();
 
+    void bratu_with_sumlist();
+
     void show();
 
     void forward_sweep();

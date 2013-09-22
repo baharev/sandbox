@@ -17,6 +17,8 @@
 
 using namespace std;
 
+#define BUILD_STR_NODES
+
 struct str_node;
 
 namespace {
@@ -175,6 +177,30 @@ offset exp(offset args) {
     return args+2;
 }
 
+offset sumlist(offset args) {
+
+    offset n   = offsets.at(args);
+
+    offset res = offsets.at(args+n+1);
+
+    cout << nodes.at(res).name << " = " << flush;
+
+    for (offset i=1; i<n; i+=2) {
+
+        offset c = offsets.at(args+i  );
+
+        offset x = offsets.at(args+i+1);
+
+        if (i!=1) cout << " + ";
+
+        cout << nodes.at(c).name << " * " << nodes.at(x).name;
+    }
+
+    cout << endl;
+
+    return args+n+2;
+}
+
 } // namespace detail
 
 namespace safe {
@@ -275,12 +301,70 @@ str_node exp(const str_node& arg) {
     return add_unary_node(detail::exp, exp, arg);
 }
 
+str_node sumlist_cx(const str_node& c, const str_node& x) {
+
+    str_node res;
+
+    offsets.push_back(c.index);
+
+    offsets.push_back(x.index);
+
+    offsets.push_back(res.index);
+
+    return res;
+}
+
+template <typename... Args>
+str_node sumlist_cx(const str_node& c, const str_node& x, Args&&... s) {
+
+    offsets.push_back(c.index);
+
+    offsets.push_back(x.index);
+
+    return sumlist(forward<Args>(s)...);
+}
+
+
+template <typename... Args>
+str_node sumlist(Args&&... s) {
+
+    offset n = sizeof... (Args);
+
+    functions.push_back(detail::sumlist);
+
+    offsets.push_back(n);
+
+    return sumlist_cx(forward<Args>(s)...);
+}
+
+str_node sumlist(initializer_list<str_node> s) {
+
+    offset n = static_cast<offset>(s.size());
+
+    functions.push_back(detail::sumlist);
+
+    offsets.push_back(n);
+
+    str_node res;
+
+    for (const str_node& node : s) {
+
+        offsets.push_back(node.index);
+    }
+
+    offsets.push_back(res.index);
+
+    return res;
+}
+
 void build_test::init(const std::vector<std::string>& ) {
 
 }
 
 void build_test::show() {
+
 #ifdef BUILD_STR_NODES
+
     cout << "variables" << endl;
 
     for (auto var : var_pos) {
@@ -316,7 +400,9 @@ void build_test::show() {
 
         args = f(args);
     }
+
 #endif
+
 }
 
 void build_test::forward_sweep() {
@@ -359,14 +445,18 @@ void build_test::forward_sweep() {
 
 void build_test::run() {
 
-    bratu();
+    bratu_with_sumlist();
 
-    //show();
 #ifdef BUILD_STR_NODES
+
+    show();
+
     nodes = vector<str_node>();
 
     functions = vector<operation>();
+
 #endif
+
     forward_sweep();
 }
 
@@ -390,9 +480,55 @@ void build_test::dummy_example() {
     con2.push_constraint();
 }
 
+void build_test::bratu_with_sumlist() {
+
+    const int n = 3;
+
+    const double h2 = std::pow(1.0/(n+1), 2);
+
+    str_node x1("x1");
+
+    str_node x2("x2");
+
+    //str_node con1 = x2 + (-2)*x1 + h2*exp(x1);
+
+    str_node y1 = exp(x1);
+
+    str_node con1 = sumlist({str_node(1), x2, str_node(-2), x1, str_node(h2), y1});
+
+    con1.push_constraint();
+
+    int index = 3;
+
+    str_node x3("x3");
+
+    for (int i=2; i<n; ++i) {
+
+        //str_node con = x3 + (-2)*x2 + x1 + h2*exp(x2);
+        str_node y2 = exp(x2);
+
+        str_node con = sumlist({str_node(1), x3, str_node(-2), x2, str_node(1), x1, str_node(h2), y2});
+
+        con.push_constraint();
+
+        x1 = std::move(x2);
+        x2 = std::move(x3);
+
+        if (i<n-1) {
+            x3 = str_node("x"+to_string(index++));
+        }
+    }
+
+    str_node y2 = exp(x2);
+
+    str_node last_con = sumlist({str_node(-2), x2, str_node(1), x1, str_node(h2), y2});
+
+    last_con.push_constraint();
+}
+
 void build_test::bratu() {
 
-    const int n = 20000;
+    const int n = 3;
 
     const double h2 = std::pow(1.0/(n+1), 2);
 
